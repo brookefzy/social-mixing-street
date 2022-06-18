@@ -1,0 +1,19 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{3}{cccc}}
+\toprule
+                &\multicolumn{2}{c}{(1)}&\multicolumn{2}{c}{(2)}&\multicolumn{2}{c}{(3)}     \\
+                &\multicolumn{2}{c}{Year 2016}&\multicolumn{2}{c}{Year 2018}&\multicolumn{2}{c}{Difference 2016 - 2018}\\
+                &     mean&       sd&     mean&       sd&        b         &        t\\
+\midrule
+Pop. Den.       &11774.124&10485.449&12204.744&10871.770& -430.620         & (-1.750)\\
+MH Income.      &86842.465&25146.433&95907.760&28601.010&-9065.296\sym{***}&(-14.612)\\
+\% Bachelor     &    0.740&    0.136&    0.752&    0.132&   -0.012\sym{***}& (-3.898)\\
+Resi. Diversity &    0.700&    0.242&    0.699&    0.235&    0.001         &  (0.099)\\
+Street Score    &    4.988&    0.293&    4.996&    0.231&   -0.008         & (-0.910)\\
+ESM             &    0.805&    0.166&    0.863&    0.124&   -0.058\sym{***}&(-17.179)\\
+\midrule
+Observations    &     3768&         &     3768&         &     7536         &         \\
+\bottomrule
+\end{tabular}
+}
