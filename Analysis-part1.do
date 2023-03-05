@@ -18,7 +18,7 @@ global lmg "${setting}/_table/lmg"
 global graphic "${setting}/_graphic"
 
 
-import delimited using "${project}/str_para_3city.csv", clear
+import delimited using "${project}/str_para_3city_join_week.csv", clear
 
 describe
 
@@ -41,6 +41,7 @@ tabulate city
 * dist_home: Average visitors' home distance from each street
 * mhincomeadj: Median Household Income of each street segment's neighborhood
 * safety: Safety Score predicted from deep learning model using google street view images
+* dist_center: Distance from the urban core center
 
 *******************************************************************************
 //////////////// setup Sample Rules ////////////////////
@@ -50,6 +51,7 @@ drop if img_count<8
 drop if totalpoi<3
 drop if tot_pop_cbgadj<50
 keep if unique_total>20
+drop if length>9000
 
 
 *******************************************************************************
@@ -85,9 +87,11 @@ gen logtime1822 = log(timevitist_18_22 +1)
 
 *******************************************************************************
 	       * Set up group variables *
+		   * Adding the neighbor characteristics*
 *******************************************************************************
 global controls length logdist logpopdensity logpoi logincome bachelor_rateadj park_dist_m station_dist_m
 global residiv incomediversity4adj
+
 global place cityoutdoors artsmuseum coffeetea entertainment food grocery health religious school service shopping sports transportation work college
 global dependent div_6_10 seg_6_10 div_10_14 seg_10_14 div_14_18 seg_14_18 div_18_22 seg_18_22 expdiv dexpseg logtime logtime610 logtime1014 logtime1418 logtime1822
 
@@ -187,7 +191,7 @@ label var std_logcount "Log(Visitors)"
 	*1. Simple Linear: Time in-variant  *
 *******************************************************************************
 
-global basics std_length
+global basics std_length std_logdist
 global fixed i.ncounty
 global stdemo std_logpopdensity std_logincome std_incomediversity4adj
 global stdplace  std_logfood std_logshopping std_logcollege std_logwork std_logsports std_logtransportation std_logservice std_loghealth std_loggrocery std_logentertainment std_logcoffee std_logartsmuseum std_logcityout std_safety
@@ -209,6 +213,7 @@ egen std_timevisit = std(timevisit)
 
 egen std_logtime2 = std(logtime*logtime)
 
+
 // 0. Regress on total time spent
 eststo rt0: reg std_logtimevisit $basics $stdemo $fixed std_logpoi std_safety if (totalpoi>=3), r
 
@@ -223,9 +228,10 @@ eststo rt2: reg std_expdiv $basics $stdemo $fixed std_logpoi std_safety if (tota
 eststo rt3: reg std_expdiv $basics $stdemo $fixed std_logpoi std_safety std_safety2 if (totalpoi>=3), r
 
 
+
 // 4. Include total time as a variable
 eststo rt4: reg std_expdiv $basics $stdemo $fixed std_logpoi std_safety std_logtimevisit if (totalpoi>=3), r
-vif
+
 // 5. Include a daily unique visitors as a variable
 eststo rt5: reg std_expdiv $basics $stdemo $fixed std_logpoi std_safety std_logcount if (totalpoi>=3), r
 
@@ -239,7 +245,28 @@ esttab rt1 rt2 rt4 rt5 using "${savefile}/st_std_3city_density.csv", replace wid
  * Table S1 (Supplemental)
  esttab rt1 rt2 rt3 rt5 using "${savefile}/tableS1_street.tex", replace booktabs label ///
  cells(b(star fmt(%9.3f)) se(par)) stats(N r2, fmt(%7.0f %7.4f) labels("Observations" "R-squared")) starlevels(\sym{*} 0.1 \sym{**} 0.05 \sym{***} 0.005) 
+ 
+*******************************************************************************
+	*1.2. Visiting Density and ESM  Appendix + Spatial Spi
+*******************************************************************************
 
+// 1. Regress on daily unique visitors (adjusted by factor)
+eststo ivrt1: ivreg2 std_logcount $basics $stdemo $fixed std_logpoi std_safety (spill_count = $basics $fixed) if (totalpoi>=3), r
+
+
+// 2. Regress on social mixing
+eststo ivrt2: ivreg2 std_expdiv $basics $stdemo $fixed std_logpoi std_safety (spill_esm = $basics $fixed) if (totalpoi>=3), r
+
+// 3. Include a quadratic term
+eststo ivrt3: ivreg2 std_expdiv $basics $stdemo $fixed std_logpoi std_safety std_safety2 if (totalpoi>=3), r
+
+
+// 5. Include a daily unique visitors as a variable
+eststo ivrt5: ivreg2 std_expdiv $basics $stdemo $fixed std_logpoi std_safety std_logcount if (totalpoi>=3), r
+
+ * Table S1 (Supplemental)
+ esttab rt1 rt2 rt3 rt5 using "${savefile}/tableS1_street.tex", replace booktabs label ///
+ cells(b(star fmt(%9.3f)) se(par)) stats(N r2, fmt(%7.0f %7.4f) labels("Observations" "R-squared")) starlevels(\sym{*} 0.1 \sym{**} 0.05 \sym{***} 0.005) 
 
 *******************************************************************************
 	*1.2. Visiting Density and ESM  Fig. S4*

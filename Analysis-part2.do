@@ -13,7 +13,7 @@ global lmg "${setting}/_table/lmg"
 global graphic "${setting}/_graphic"
 
 
-import delimited using "${project}/str_para_3city.csv", clear
+import delimited using "${project}/str_para_3city_join_week.csv", clear
 
 describe
 
@@ -58,7 +58,7 @@ gen logpopdensity = log(pop_density_c)
 gen logdist = log(dist_center)
 gen logpop = log(tot_pop_cbgadj)
 
-gen logcount = log(counts_total+1)
+// gen logcount = log(counts_total+1)
 gen logcount610 = log(counts_6_10+1)
 gen logcount1014 = log(counts_10_14+1)
 gen logcount1418 = log(counts_14_18+1)
@@ -187,11 +187,11 @@ label var std_logcount "Log(Visitors)"
 eststo clear
 
 
-global basics std_length
+global basics std_length std_logdist
 global fixed i.ncounty 
 global stdemo std_logpopdensity std_logincome std_incomediversity4adj
 
-global controls i.ncounty std_length
+global controls i.ncounty std_length std_logdist
 global d3 std_logpopdensity std_incomediversity4adj std_logpoi std_logincome std_safety std_safety2
 
 
