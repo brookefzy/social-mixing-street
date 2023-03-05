@@ -7,7 +7,7 @@ set more off
 
 clear all
 * Set directory to location of data
-global setting "D:\Dropbox (MIT)\2020_Rentify_Business\submission\ESM_PNAS\code"
+global setting "."
 
 global project "${setting}/_data/"
 global savefile "${setting}/_table"
@@ -18,7 +18,7 @@ global lmg "${setting}/_table/lmg"
 global graphic "${setting}/_graphic"
 
 
-import delimited using "${project}/str_para_3city_join_week.csv", clear
+import delimited using "${project}/str_para_3city.csv", clear
 
 describe
 

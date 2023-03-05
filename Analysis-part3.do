@@ -3,7 +3,7 @@ set more off
 clear all
 * Set directory to location of data
 
-global setting "D:\Dropbox (MIT)\2020_Rentify_Business\submission\ESM_PNAS\code"
+global setting "."
 
 global project "${setting}/_data/"
 global savefile "${setting}/_table"
